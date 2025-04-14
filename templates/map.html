@@ -3,106 +3,36 @@
 <head>
 	<title>Ecolia Realistic World</title>
 	<style>
-		html, body {
-			margin: 0;
-			padding: 0;
-			height: 100%;
-			width: 100%;
-			overflow: hidden;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			background-color: #f5f6fa;
-			font-family: sans-serif;
-		}
-		h1 {
-			margin: 10px 0 5px;
-		}
-		.controls {
-			display: flex;
-			gap: 10px;
-			margin-bottom: 10px;
-		}
-		button {
-			padding: 6px 12px;
-			font-size: 16px;
-			border-radius: 6px;
-			border: 1px solid #ccc;
-			background-color: #ecf0f1;
+		svg image:hover {
+			opacity: 0.7;
 			cursor: pointer;
-		}
-		button:hover {
-			background-color: #dcdde1;
-		}
-		.map-container {
-			flex: 1;
-			width: 100%;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-		}
-		svg {
-			width: 90vw;
-			height: auto;
-			max-height: 80vh;
-			border: 2px solid #ccc;
-			background-color: white;
-			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		}
 	</style>
 </head>
 <body>
 	<h1>🗺️ Ecolia Realistic World</h1>
-
-	<div class="controls">
-		<button onclick="move('up')">⬆️ 위</button>
-		<button onclick="move('left')">⬅️ 좌</button>
-		<button onclick="move('right')">➡️ 우</button>
-		<button onclick="move('down')">⬇️ 아래</button>
-	</div>
-
-	<div class="map-container">
-		<svg id="map" viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet"></svg>
-	</div>
+	<svg id="map" width="640" height="640"></svg>
 
 	<script>
 		const TILE_SIZE = 64;
-		const VIEW_SIZE = 10;
-		const MAX_BOUND = 200;
-		let originX = 0;
-		let originY = 0;
 		const svg = document.getElementById("map");
 
-		function fetchAndRenderMap() {
-			svg.innerHTML = "";
-			fetch(`/api/map?x=${originX}&y=${originY}&size=${VIEW_SIZE}`)
-				.then(res => res.json())
-				.then(data => {
-					const tiles = data.tiles;
-					tiles.forEach((row, y) => {
-						row.forEach((tile, x) => {
-							const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
-							image.setAttribute("x", x * TILE_SIZE);
-							image.setAttribute("y", y * TILE_SIZE);
-							image.setAttribute("width", TILE_SIZE);
-							image.setAttribute("height", TILE_SIZE);
-							image.setAttributeNS("http://www.w3.org/1999/xlink", "href", `/static/tiles/${tile}.svg`);
-							svg.appendChild(image);
-						});
+		fetch("/api/map?x=100&y=100&size=10")
+			.then(res => res.json())
+			.then(data => {
+				const tiles = data.tiles;
+				tiles.forEach((row, y) => {
+					row.forEach((tile, x) => {
+						const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
+						image.setAttribute("x", x * TILE_SIZE);
+						image.setAttribute("y", y * TILE_SIZE);
+						image.setAttribute("width", TILE_SIZE);
+						image.setAttribute("height", TILE_SIZE);
+						image.setAttributeNS("http://www.w3.org/1999/xlink", "href", `/static/tiles/${tile}.svg`);
+						svg.appendChild(image);
 					});
 				});
-		}
-
-		function move(direction) {
-			const delta = VIEW_SIZE;
-			if (direction === "up") originY = Math.max(0, originY - delta);
-			if (direction === "down") originY = Math.min(MAX_BOUND - VIEW_SIZE, originY + delta);
-			if (direction === "left") originX = Math.max(0, originX - delta);
-			if (direction === "right") originX = Math.min(MAX_BOUND - VIEW_SIZE, originX + delta);
-			fetchAndRenderMap();
-		}
-
-		fetchAndRenderMap();
+			});
 	</script>
 </body>
 </html>
