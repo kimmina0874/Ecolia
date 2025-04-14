@@ -11,28 +11,57 @@
 </head>
 <body>
 	<h1>🗺️ Ecolia Realistic World</h1>
+
+	<!-- 🔼 이동 버튼 -->
+	<div style="margin-bottom: 10px;">
+		<button onclick="move('up')">⬆️ 위</button>
+		<button onclick="move('left')">⬅️ 좌</button>
+		<button onclick="move('right')">➡️ 우</button>
+		<button onclick="move('down')">⬇️ 아래</button>
+	</div>
+
+	<!-- SVG 맵 -->
 	<svg id="map" width="640" height="640"></svg>
 
 	<script>
 		const TILE_SIZE = 64;
+		const VIEW_SIZE = 10;           // 한번에 보이는 타일 수 (10x10)
+		const MAX_BOUND = 200;          // 최대 보여줄 맵 경계 (200x200)
+		let originX = 0;
+		let originY = 0;
 		const svg = document.getElementById("map");
 
-		fetch("/api/map?x=100&y=100&size=10")
-			.then(res => res.json())
-			.then(data => {
-				const tiles = data.tiles;
-				tiles.forEach((row, y) => {
-					row.forEach((tile, x) => {
-						const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
-						image.setAttribute("x", x * TILE_SIZE);
-						image.setAttribute("y", y * TILE_SIZE);
-						image.setAttribute("width", TILE_SIZE);
-						image.setAttribute("height", TILE_SIZE);
-						image.setAttributeNS("http://www.w3.org/1999/xlink", "href", `/static/tiles/${tile}.svg`);
-						svg.appendChild(image);
+		function fetchAndRenderMap() {
+			svg.innerHTML = ""; // 기존 타일 지우기
+			fetch(`/api/map?x=${originX}&y=${originY}&size=${VIEW_SIZE}`)
+				.then(res => res.json())
+				.then(data => {
+					const tiles = data.tiles;
+					tiles.forEach((row, y) => {
+						row.forEach((tile, x) => {
+							const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
+							image.setAttribute("x", x * TILE_SIZE);
+							image.setAttribute("y", y * TILE_SIZE);
+							image.setAttribute("width", TILE_SIZE);
+							image.setAttribute("height", TILE_SIZE);
+							image.setAttributeNS("http://www.w3.org/1999/xlink", "href", `/static/tiles/${tile}.svg`);
+							svg.appendChild(image);
+						});
 					});
 				});
-			});
+		}
+
+		function move(direction) {
+			const delta = VIEW_SIZE; // 이동 간격
+			if (direction === "up") originY = Math.max(0, originY - delta);
+			if (direction === "down") originY = Math.min(MAX_BOUND - VIEW_SIZE, originY + delta);
+			if (direction === "left") originX = Math.max(0, originX - delta);
+			if (direction === "right") originX = Math.min(MAX_BOUND - VIEW_SIZE, originX + delta);
+			fetchAndRenderMap();
+		}
+
+		// 초기 로딩
+		fetchAndRenderMap();
 	</script>
 </body>
 </html>
