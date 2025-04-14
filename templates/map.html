@@ -3,36 +3,66 @@
 <head>
 	<title>Ecolia Realistic World</title>
 	<style>
-		svg image:hover {
-			opacity: 0.7;
+		body {
+			font-family: sans-serif;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			padding: 30px;
+			background-color: #f5f6fa;
+		}
+		h1 {
+			margin-bottom: 10px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		.controls {
+			display: flex;
+			justify-content: center;
+			gap: 10px;
+			margin-bottom: 20px;
+		}
+		#map {
+			border: 2px solid #ccc;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			background-color: white;
+		}
+		button {
+			padding: 6px 12px;
+			font-size: 16px;
+			border-radius: 6px;
+			border: 1px solid #ccc;
+			background-color: #ecf0f1;
 			cursor: pointer;
+		}
+		button:hover {
+			background-color: #dcdde1;
 		}
 	</style>
 </head>
 <body>
 	<h1>🗺️ Ecolia Realistic World</h1>
 
-	<!-- 🔼 이동 버튼 -->
-	<div style="margin-bottom: 10px;">
+	<div class="controls">
 		<button onclick="move('up')">⬆️ 위</button>
 		<button onclick="move('left')">⬅️ 좌</button>
 		<button onclick="move('right')">➡️ 우</button>
 		<button onclick="move('down')">⬇️ 아래</button>
 	</div>
 
-	<!-- SVG 맵 -->
 	<svg id="map" width="640" height="640"></svg>
 
 	<script>
 		const TILE_SIZE = 64;
-		const VIEW_SIZE = 10;           // 한번에 보이는 타일 수 (10x10)
-		const MAX_BOUND = 200;          // 최대 보여줄 맵 경계 (200x200)
+		const VIEW_SIZE = 10;
+		const MAX_BOUND = 200;
 		let originX = 0;
 		let originY = 0;
 		const svg = document.getElementById("map");
 
 		function fetchAndRenderMap() {
-			svg.innerHTML = ""; // 기존 타일 지우기
+			svg.innerHTML = "";
 			fetch(`/api/map?x=${originX}&y=${originY}&size=${VIEW_SIZE}`)
 				.then(res => res.json())
 				.then(data => {
@@ -52,7 +82,7 @@
 		}
 
 		function move(direction) {
-			const delta = VIEW_SIZE; // 이동 간격
+			const delta = VIEW_SIZE;
 			if (direction === "up") originY = Math.max(0, originY - delta);
 			if (direction === "down") originY = Math.min(MAX_BOUND - VIEW_SIZE, originY + delta);
 			if (direction === "left") originX = Math.max(0, originX - delta);
@@ -60,7 +90,6 @@
 			fetchAndRenderMap();
 		}
 
-		// 초기 로딩
 		fetchAndRenderMap();
 	</script>
 </body>
