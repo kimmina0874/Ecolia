@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Ecolia World</title>
+	<style>
+		svg image:hover {
+			opacity: 0.7;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<h1>🗺️ Ecolia World (Python 프론트)</h1>
+	<svg id="map" width="640" height="640"></svg>
+
+	<script>
+		const TILE_SIZE = 64;
+		const svg = document.getElementById("map");
+
+		fetch("/api/map?x=100&y=100&size=10")
+			.then(res => res.json())
+			.then(data => {
+				const tiles = data.tiles;
+				tiles.forEach((row, y) => {
+					row.forEach((tile, x) => {
+						const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
+						image.setAttribute("x", x * TILE_SIZE);
+						image.setAttribute("y", y * TILE_SIZE);
+						image.setAttribute("width", TILE_SIZE);
+						image.setAttribute("height", TILE_SIZE);
+						image.setAttributeNS("http://www.w3.org/1999/xlink", "href", `/static/tiles/${tile}.svg`);
+						svg.appendChild(image);
+					});
+				});
+			});
+	</script>
+</body>
+</html>

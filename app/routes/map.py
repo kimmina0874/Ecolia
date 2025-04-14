@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Query
 from app.services.map_generator import generate_map
 
-router = APIRouter(prefix="/api/map", tags=["Map"])
+router = APIRouter()
 full_map = generate_map()
 
-@router.get("")
+@router.get("/api/map")
 def get_map(
 	x: int = Query(0, ge=0, le=1999),
 	y: int = Query(0, ge=0, le=1999),
