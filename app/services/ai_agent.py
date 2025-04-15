@@ -10,6 +10,7 @@ class AIAgent:
 		self.is_alive = True
 		self.sick = False
 		self.task = "idle"
+		self.village_center = None  # 마을 위치 저장
 
 	def tick(self):
 		if not self.is_alive:
@@ -17,21 +18,35 @@ class AIAgent:
 
 		self.age += 1
 		self.energy -= 1 if not self.sick else 2
+		if self.energy <= 0 or (self.age > 100 and random.random() < 0.05):
+			self.is_alive = False
+			return
 
-		# 질병 확률 (1%)
 		if not self.sick and random.random() < 0.01:
 			self.sick = True
 
-		# 노화로 인한 자연사 확률 (5% 이상)
-		if self.age > 100 and random.random() < 0.05:
-			self.is_alive = False
+		# 행동 수행
+		if self.task == "idle":
+			if not self.village_center and random.random() < 0.1:
+				self.task = "build_village"
+			else:
+				self.task = "explore"
 
-		if self.energy <= 0:
-			self.is_alive = False
+		elif self.task == "explore":
+			self.x += random.choice([-1, 0, 1])
+			self.y += random.choice([-1, 0, 1])
+			if random.random() < 0.2:
+				self.task = "idle"
 
-		# 간단한 랜덤 이동
-		self.x += random.choice([-1, 0, 1])
-		self.y += random.choice([-1, 0, 1])
+		elif self.task == "build_village":
+			self.village_center = (self.x, self.y)
+			self.task = "farm"
+
+		elif self.task == "farm":
+			# 농사짓기 (에너지 회복)
+			self.energy = min(100, self.energy + 3)
+			if random.random() < 0.05:
+				self.task = "idle"
 
 # 전역 에이전트 리스트
 ai_agents = [
