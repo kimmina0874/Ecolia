@@ -1,38 +1,144 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Ecolia Realistic World</title>
+	<title>Ecolia + Minimap</title>
 	<style>
-		svg image:hover {
-			opacity: 0.7;
+		body {
+			margin: 0;
+			padding: 0;
+			height: 100%;
+			font-family: sans-serif;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: #f5f6fa;
+		}
+		h1 {
+			margin: 10px 0 5px;
+		}
+		.controls {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 10px;
+		}
+		button {
+			padding: 6px 12px;
+			border-radius: 6px;
+			border: 1px solid #ccc;
+			background: #ecf0f1;
 			cursor: pointer;
+		}
+		.map-container {
+			flex: 1;
+			width: 100%;
+			position: relative; /* 💡 미니맵 보이게 하기 위해 필수 */
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		svg {
+			width: 90vw;
+			height: auto;
+			max-height: 80vh;
+			border: 2px solid #ccc;
+			background-color: white;
+		}
+		#minimap {
+			position: absolute;
+			right: 20px;
+			bottom: 20px;
+			width: 200px;
+			height: 200px;
+			border: 2px solid #aaa;
+			background-color: white;
+			z-index: 10;
 		}
 	</style>
 </head>
 <body>
 	<h1>🗺️ Ecolia Realistic World</h1>
-	<svg id="map" width="640" height="640"></svg>
+
+	<div class="controls">
+		<button onclick="move('up')">⬆️ 위</button>
+		<button onclick="move('left')">⬅️ 좌</button>
+		<button onclick="move('right')">➡️ 우</button>
+		<button onclick="move('down')">⬇️ 아래</button>
+	</div>
+
+	<div class="map-container">
+		<svg id="map" viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet"></svg>
+		<canvas id="minimap"></canvas>
+	</div>
 
 	<script>
 		const TILE_SIZE = 64;
-		const svg = document.getElementById("map");
+		const VIEW_SIZE = 10;
+		const MAX_BOUND = 200;
+		let originX = 0;
+		let originY = 0;
 
-		fetch("/api/map?x=100&y=100&size=10")
-			.then(res => res.json())
-			.then(data => {
-				const tiles = data.tiles;
-				tiles.forEach((row, y) => {
-					row.forEach((tile, x) => {
-						const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
-						image.setAttribute("x", x * TILE_SIZE);
-						image.setAttribute("y", y * TILE_SIZE);
-						image.setAttribute("width", TILE_SIZE);
-						image.setAttribute("height", TILE_SIZE);
-						image.setAttributeNS("http://www.w3.org/1999/xlink", "href", `/static/tiles/${tile}.svg`);
-						svg.appendChild(image);
+		const svg = document.getElementById("map");
+		const canvas = document.getElementById("minimap");
+		const ctx = canvas.getContext("2d");
+
+		function fetchAndRenderMap() {
+			svg.innerHTML = "";
+			fetch(`/api/map?x=${originX}&y=${originY}&size=${VIEW_SIZE}`)
+				.then(res => res.json())
+				.then(data => {
+					const tiles = data.tiles;
+					tiles.forEach((row, y) => {
+						row.forEach((tile, x) => {
+							const image = document.createElementNS("http://www.w3.org/2000/svg", "image");
+							image.setAttribute("x", x * TILE_SIZE);
+							image.setAttribute("y", y * TILE_SIZE);
+							image.setAttribute("width", TILE_SIZE);
+							image.setAttribute("height", TILE_SIZE);
+							image.setAttributeNS("http://www.w3.org/1999/xlink", "href", `/static/tiles/${tile}.svg`);
+							svg.appendChild(image);
+						});
 					});
 				});
-			});
+		}
+
+		function renderMinimap() {
+			fetch("/api/minimap")
+				.then(res => res.json())
+				.then(data => {
+					const map = data.minimap;
+					const cellSize = 1;
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					map.forEach((row, y) => {
+						row.forEach((color, x) => {
+							ctx.fillStyle = color;
+							ctx.fillRect(x, y, cellSize, cellSize);
+						});
+					});
+					ctx.strokeStyle = "red";
+					ctx.lineWidth = 1;
+					ctx.strokeRect(originX / 10, originY / 10, VIEW_SIZE / 10, VIEW_SIZE / 10);
+				});
+		}
+
+		function move(direction) {
+			const delta = VIEW_SIZE;
+			if (direction === "up") originY = Math.max(0, originY - delta);
+			if (direction === "down") originY = Math.min(MAX_BOUND - VIEW_SIZE, originY + delta);
+			if (direction === "left") originX = Math.max(0, originX - delta);
+			if (direction === "right") originX = Math.min(MAX_BOUND - VIEW_SIZE, originX + delta);
+			fetchAndRenderMap();
+			renderMinimap();
+		}
+
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "ArrowUp") move("up");
+			if (e.key === "ArrowDown") move("down");
+			if (e.key === "ArrowLeft") move("left");
+			if (e.key === "ArrowRight") move("right");
+		});
+
+		fetchAndRenderMap();
+		renderMinimap();
 	</script>
 </body>
 </html>
