@@ -124,14 +124,18 @@
             if (!data || !data.minimap) return;
             const map = data.minimap;
             const cellSize = 2;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 배경 지형 색상
             map.forEach((row, y) => {
               row.forEach((color, x) => {
                 ctx.fillStyle = color;
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
               });
             });
-            // 현재 위치 표시
+
+            // ✅ 현재 위치 사각형
             ctx.strokeStyle = "red";
             ctx.lineWidth = 1;
             ctx.strokeRect(
@@ -140,6 +144,23 @@
               (VIEW_SIZE / 20) * cellSize,
               (VIEW_SIZE / 20) * cellSize
             );
+
+            // ✅ AI 위치 표시
+            fetch("/api/agents")
+              .then((res) => res.json())
+              .then((agents) => {
+                agents.forEach((a) => {
+                  const mx = Math.floor(a.x / 20);
+                  const my = Math.floor(a.y / 20);
+                  ctx.fillStyle = a.sick ? "purple" : "black"; // 병에 걸린 애는 보라색
+                  ctx.fillRect(
+                    mx * cellSize,
+                    my * cellSize,
+                    cellSize,
+                    cellSize
+                  );
+                });
+              });
           });
       }
 
