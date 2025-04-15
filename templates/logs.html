@@ -1,46 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Ecolia World Logs</title>
+	<title>Ecolia Logs</title>
 	<style>
-		body { background: #111; color: #eee; font-family: monospace; padding: 20px; }
-		#log, #dialog { white-space: pre-line; border: 1px solid #444; padding: 10px; height: 200px; overflow-y: scroll; margin-bottom: 20px; }
-		select { margin-bottom: 10px; }
+		body { font-family: monospace; background: #1e1e1e; color: #eee; padding: 20px; }
+		#log { white-space: pre-line; border: 1px solid #444; padding: 10px; height: 80vh; overflow-y: scroll; background: #2e2e2e; }
 	</style>
 </head>
 <body>
-	<h2>🌍 Ecolia 시뮬레이션 로그</h2>
+	<h2>Ecolia 현실 행동 로그</h2>
 	<div id="log">[Logs loading...]</div>
-
-	<h3>💬 대화 보기</h3>
-	<select id="level">
-		<option value="all">전체</option>
-		<option value="international">국제</option>
-		<option value="national">국가</option>
-		<option value="city">도시</option>
-		<option value="village">마을</option>
-		<option value="personal">개인</option>
-	</select>
-	<div id="dialog">[Dialogs loading...]</div>
-
 	<script>
 		const logBox = document.getElementById("log");
-		const dialogBox = document.getElementById("dialog");
-		const level = document.getElementById("level");
-
 		async function fetchLogs() {
 			const res = await fetch("/api/logs");
 			const data = await res.json();
 			logBox.innerText = data.logs.join("\n");
 		}
-		async function fetchDialogs() {
-			const res = await fetch(`/api/dialogs?level=${level.value}`);
-			const data = await res.json();
-			dialogBox.innerText = data.dialogs.join("\n");
-		}
 		setInterval(fetchLogs, 1000);
-		setInterval(fetchDialogs, 1500);
-		level.addEventListener("change", fetchDialogs);
 	</script>
 </body>
 </html>
