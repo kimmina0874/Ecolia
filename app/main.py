@@ -1,24 +1,32 @@
-# app/main.py
-
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from app.routes import map  # 라우터는 map.py에서 처리
+
+from app.routes import map, ai
+from app.services.ai_agent import ai_tick_all
+import asyncio
 
 app = FastAPI()
 
-# 정적 파일 설정
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# 템플릿 설정
 templates = Jinja2Templates(directory="templates")
 
-# API 라우터 등록
+# 라우터 등록
 app.include_router(map.router)
+app.include_router(ai.router)
 
-# 기본 페이지: map.html 렌더링
+# 기본 map.html 렌더링
 @app.get("/", response_class=HTMLResponse)
 @app.get("/map", response_class=HTMLResponse)
 async def serve_map(request: Request):
 	return templates.TemplateResponse("map.html", {"request": request})
+
+# ✅ 백그라운드 AI tick loop
+@app.on_event("startup")
+async def start_ai_loop():
+	async def run_loop():
+		while True:
+			ai_tick_all()
+			await asyncio.sleep(1.0)  # 1초마다 tick
+	asyncio.create_task(run_loop())
