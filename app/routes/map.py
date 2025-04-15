@@ -1,3 +1,5 @@
+# app/routes/map.py
+
 from fastapi import APIRouter, Query
 from app.services.map_generator import generate_map
 
@@ -13,9 +15,22 @@ def get_map(
 	x_end = min(x + size, len(full_map[0]))
 	y_end = min(y + size, len(full_map))
 	section = [row[x:x_end] for row in full_map[y:y_end]]
-
 	return {
 		"origin": [x, y],
 		"size": size,
 		"tiles": section
 	}
+
+@router.get("/api/minimap")
+def get_minimap():
+	color_map = {
+		"ocean": "#2980b9",
+		"beach": "#f9ca24",
+		"river": "#74b9ff",
+		"desert": "#f6e58d",
+		"grass": "#6ab04c",
+		"forest": "#27ae60",
+		"mountain": "#7f8c8d"
+	}
+	minimap = [[color_map[tile] for tile in row[::20]] for row in full_map[::20]]
+	return {"minimap": minimap}
