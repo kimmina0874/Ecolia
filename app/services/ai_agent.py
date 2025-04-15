@@ -96,7 +96,6 @@ class AIAgent:
 
 	def idle(self):
 		add_log(f"{self.name}이 휴식을 취하고 있습니다 🌤️")
-
 ai_agents = [
 	AIAgent(1, "지호", "남", 50, 50),
 	AIAgent(2, "민아", "여", 52, 50)
@@ -105,3 +104,13 @@ ai_agents = [
 def ai_tick_all():
 	for ai in ai_agents:
 		ai.tick()
+
+def get_status(self):
+	return {
+		"name": self.name,
+		"age": self.age,
+		"hunger": self.hunger,
+		"sleepiness": self.sleepiness,
+		"task": self.task,
+		"inventory": self.inventory
+	}

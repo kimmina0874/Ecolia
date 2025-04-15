@@ -5,8 +5,10 @@ from fastapi.staticfiles import StaticFiles
 from app.routes import log
 from app.services.ai_agent import ai_tick_all
 import asyncio
+from app.routes import agents  # ← 추가
 
 app = FastAPI()
+app.include_router(agents.router)
 templates = Jinja2Templates(directory="templates")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

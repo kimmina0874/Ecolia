@@ -1,24 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Ecolia 행동 로그</title>
+	<title>Ecolia 행동 로그 & AI 상태</title>
 	<style>
-		body { font-family: monospace; background: #1e1e1e; color: #eee; padding: 20px; }
-		#log { white-space: pre-line; border: 1px solid #444; padding: 10px; height: 80vh; overflow-y: scroll; background: #2e2e2e; }
+		body {
+			font-family: monospace;
+			background: #1e1e1e;
+			color: #eee;
+			padding: 20px;
+		}
+		h2 {
+			margin-top: 30px;
+		}
+		#log, #agents {
+			border: 1px solid #444;
+			padding: 10px;
+			margin-top: 10px;
+			background: #2e2e2e;
+		}
+		#log {
+			white-space: pre-line;
+			height: 40vh;
+			overflow-y: scroll;
+		}
+		#agents {
+			white-space: pre-wrap;
+		}
+		.agent {
+			padding: 5px 0;
+			border-bottom: 1px dashed #555;
+		}
 	</style>
 </head>
 <body>
-	<h2>🌍 Ecolia 행동 로그</h2>
+	<h1>🌍 Ecolia 세계 시뮬레이션</h1>
+
+	<h2>📜 실시간 행동 로그</h2>
 	<div id="log">[Logs loading...]</div>
+
+	<h2>🧍 AI 상태 모니터링</h2>
+	<div id="agents">[Agent info loading...]</div>
+
 	<script>
 		const logBox = document.getElementById("log");
+		const agentsBox = document.getElementById("agents");
+
 		async function fetchLogs() {
 			const res = await fetch("/api/logs");
 			const data = await res.json();
-			logBox.innerText = data.logs.join("\n");
+			logBox.innerText = data.logs.join("\\n");
 			logBox.scrollTop = logBox.scrollHeight;
 		}
+
+		async function fetchAgents() {
+			const res = await fetch("/api/agents");
+			const data = await res.json();
+			const html = data.agents.map(agent => `
+				<div class="agent">
+					<strong>${agent.name}</strong> (${agent.age}세)<br>
+					🍽️ 배고픔: ${agent.hunger} | 💤 수면: ${agent.sleepiness || 0}<br>
+					🧠 현재 행동: <strong>${agent.task}</strong><br>
+					📦 인벤토리: ${Object.entries(agent.inventory).map(([k,v]) => `${k}: ${v}`).join(', ')}
+				</div>
+			`).join("");
+			agentsBox.innerHTML = html;
+		}
+
 		setInterval(fetchLogs, 1000);
+		setInterval(fetchAgents, 1500);
 	</script>
 </body>
 </html>
