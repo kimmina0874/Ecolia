@@ -28,10 +28,13 @@
 			background: #ecf0f1;
 			cursor: pointer;
 		}
+		button:hover {
+			background-color: #dcdde1;
+		}
 		.map-container {
 			flex: 1;
 			width: 100%;
-			position: relative; /* 💡 미니맵 보이게 하기 위해 필수 */
+			position: relative;
 			display: flex;
 			justify-content: center;
 			align-items: center;
@@ -67,7 +70,7 @@
 
 	<div class="map-container">
 		<svg id="map" viewBox="0 0 640 640" preserveAspectRatio="xMidYMid meet"></svg>
-		<canvas id="minimap"></canvas>
+		<canvas id="minimap" width="200" height="200"></canvas>
 	</div>
 
 	<script>
@@ -105,18 +108,25 @@
 			fetch("/api/minimap")
 				.then(res => res.json())
 				.then(data => {
+					if (!data || !data.minimap) return;
 					const map = data.minimap;
-					const cellSize = 1;
+					const cellSize = 2;
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 					map.forEach((row, y) => {
 						row.forEach((color, x) => {
 							ctx.fillStyle = color;
-							ctx.fillRect(x, y, cellSize, cellSize);
+							ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 						});
 					});
+					// 현재 위치 표시
 					ctx.strokeStyle = "red";
 					ctx.lineWidth = 1;
-					ctx.strokeRect(originX / 10, originY / 10, VIEW_SIZE / 10, VIEW_SIZE / 10);
+					ctx.strokeRect(
+						(originX / 20) * cellSize,
+						(originY / 20) * cellSize,
+						(VIEW_SIZE / 20) * cellSize,
+						(VIEW_SIZE / 20) * cellSize
+					);
 				});
 		}
 
