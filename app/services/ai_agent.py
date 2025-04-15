@@ -24,16 +24,20 @@ class AIAgent:
 		self.inventory = {"fruit": 0, "mushroom": 0, "meat": 0, "wood": 0, "stone": 0}
 
 	def tick(self):
+		add_log(f"{self.name} 상태: hunger={self.hunger}, wood={self.inventory['wood']}, stone={self.inventory['stone']}")
 		self.hunger -= 2
 		self.sleepiness += 1
+
 		if self.hunger < 40:
 			self.task = self.choose_food_task()
+		elif self.inventory["wood"] >= 10 and self.inventory["stone"] >= 5:
+			self.task = "build_house"
 		elif self.inventory["wood"] < 5:
 			self.task = "gather_wood"
 		elif self.inventory["stone"] < 3:
 			self.task = "mine_stone"
 		else:
-			self.task = random.choice(["explore", "idle"])
+			self.task = "idle"
 
 		getattr(self, self.task)()
 
@@ -85,11 +89,13 @@ class AIAgent:
 		self.memory["mine_stone"]["success"] += 1
 		add_log(f"{self.name}이 돌을 채굴했습니다 🪨")
 
-	def explore(self):
-		if random.random() < 0.1:
-			add_log(f"{self.name}이 동굴을 발견했습니다! ⛰️")
-		else:
-			add_log(f"{self.name}이 주변을 탐험했습니다 🔍")
+	def build_house(self):
+		self.inventory["wood"] -= 10
+		self.inventory["stone"] -= 5
+		add_log(f"{self.name}이 집을 지었습니다 🏠")
+
+	def idle(self):
+		add_log(f"{self.name}이 휴식을 취하고 있습니다 🌤️")
 
 ai_agents = [
 	AIAgent(1, "지호", "남", 50, 50),

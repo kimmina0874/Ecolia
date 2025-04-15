@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Ecolia Logs</title>
+	<title>Ecolia 행동 로그</title>
 	<style>
 		body { font-family: monospace; background: #1e1e1e; color: #eee; padding: 20px; }
 		#log { white-space: pre-line; border: 1px solid #444; padding: 10px; height: 80vh; overflow-y: scroll; background: #2e2e2e; }
 	</style>
 </head>
 <body>
-	<h2>Ecolia 현실 행동 로그</h2>
+	<h2>🌍 Ecolia 행동 로그</h2>
 	<div id="log">[Logs loading...]</div>
 	<script>
 		const logBox = document.getElementById("log");
@@ -16,6 +16,7 @@
 			const res = await fetch("/api/logs");
 			const data = await res.json();
 			logBox.innerText = data.logs.join("\n");
+			logBox.scrollTop = logBox.scrollHeight;
 		}
 		setInterval(fetchLogs, 1000);
 	</script>
